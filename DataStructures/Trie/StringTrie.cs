@@ -7,80 +7,92 @@ namespace MattNedrich.DataStructures.Trie
 {
     public class StringTrie
     {
-        TrieLevel root;
-        int baseCode = (int)'a';
+        private StringTrieLevel root;
+        private const int baseCode = (int)'a';
 
         public StringTrie()
         {
-            root = new TrieLevel();
+            root = new StringTrieLevel();
         }
 
         public void Add(string input)
         {
-            TrieLevel current = root;
+            if (string.IsNullOrEmpty(input))
+                throw new ArgumentNullException("Input to StringTrie.Add cannot be null or empty");
             char[] chars = input.ToLower().ToArray();
-            for(int i=0; i<chars.Length; i++)
-            {
-                char c = chars[i];
-                int index = (int)c - baseCode;
-                if (i == chars.Length - 1)
-                    current.Entries[index].Set = true;
-                else
-                {
-                    // continue down the tree
-                    if (current.Entries[index].Next == null)
-                        current.Entries[index].Next = new TrieLevel();
-                    current = current.Entries[index].Next;
-                }
-            }
+            StringTrieEntry entry = ForceSearch(root, chars, 0);
+            entry.Set = true;
+        }
+
+        public void Remove(string input)
+        {
+            if (string.IsNullOrEmpty(input))
+                throw new ArgumentNullException("Input to StringTrie.Remove cannot be null or empty");
+            char[] chars = input.ToLower().ToArray();
+            StringTrieEntry entry = Search(root, chars, 0);
+            if(entry != null)
+                entry.Set = false;
         }
 
         public bool Contains(string input)
         {
-            bool result = false;
-            TrieLevel current = root;
+            if(string.IsNullOrEmpty(input))
+                throw new ArgumentNullException("Input to StringTrie.Contains cannot be null or empty");
             char[] chars = input.ToLower().ToArray();
-            for (int i = 0; i < chars.Length; i++)
-            {
-                char c = chars[i];
-                int index = (int)c - baseCode;
-                if (i == chars.Length - 1)
-                {
-                    result = current.Entries[index].Set;
-                    break;
-                }
-                else
-                {
-                    // continue down the tree
-                    if (current.Entries[index].Next == null)
-                        return false;
-                    current = current.Entries[index].Next;
-                }
-            }
-            return result;
+            StringTrieEntry entry = Search(root, chars, 0);
+            if (entry == null)
+                return false;
+            else
+                return entry.Set;
         }
 
-        private class TrieLevel
+        /// <summary>
+        /// Searches the Trie, but does not continue the search if a null entry is encountered
+        /// </summary>
+        /// <returns>The desired StringTrieEntry if it exists, null otherwise</returns>
+        private StringTrieEntry Search(StringTrieLevel level, char[] chars, int charIndex)
         {
-            public TrieEntry[] Entries { get; private set; }
-
-            public TrieLevel()
+            int arrIndex = CharToInt(chars[charIndex]);
+            if (charIndex == chars.Length - 1)
+                return level.Entries[arrIndex];
+            else if (arrIndex < 0)
+                return ForceSearch(level, chars, ++charIndex);
+            else
             {
-                Entries = new TrieEntry[32];
-                for (int i = 0; i < Entries.Length; i++)
-                    Entries[i] = new TrieEntry();
+                StringTrieLevel nextLevel = level.Entries[arrIndex].Next;
+                if (nextLevel == null)
+                    return null;
+                return Search(nextLevel, chars, ++charIndex);
             }
         }
 
-        private class TrieEntry
+        /// <summary>
+        /// Searches the Trie. If a null entry is encountered, new entries are created and the search continues.
+        /// ForceSearch ensures that a path down to the last char in the char[] exists.
+        /// </summary>
+        /// <returns>The desired StringTrieEntry. This will not be null</returns>
+        private StringTrieEntry ForceSearch(StringTrieLevel level, char[] chars, int charIndex)
         {
-            public bool Set { get; set; }
-            public TrieLevel Next { get; set; }
-            public TrieEntry()
+            int arrIndex = CharToInt(chars[charIndex]);
+            if (charIndex == chars.Length - 1)
+                return level.Entries[arrIndex];
+            else if (arrIndex < 0)
+                return ForceSearch(level, chars, ++charIndex);
+            else
             {
-                Set = false;
-                Next = null;
+                StringTrieLevel nextLevel = level.Entries[arrIndex].Next;
+                if (nextLevel == null)
+                {
+                    nextLevel = new StringTrieLevel();
+                    level.Entries[arrIndex].Next = nextLevel;
+                }
+                return ForceSearch(nextLevel, chars, ++charIndex);
             }
+        }
+
+        private int CharToInt(char c)
+        {
+            return (int)c - baseCode;
         }
     }
 

@@ -214,3 +214,6 @@ pip-log.txt
 #Mr Developer
 .mr.developer.cfg
 *.sln
+DataStructures/DebugRunner/DebugRunner.csproj
+DataStructures/DebugRunner/Program.cs
+DataStructures/DebugRunner/Properties/AssemblyInfo.cs

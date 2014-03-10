@@ -26,6 +26,44 @@ namespace DataStructures.Test.TrieTests
         }
 
         [Test]
+        public void Adding_Test_Does_Not_Add_Prefixes()
+        {
+            trie.Add("test");
+            Assert.False(trie.Contains("t"));
+            Assert.False(trie.Contains("te"));
+            Assert.False(trie.Contains("tes"));
+            Assert.True(trie.Contains("test"));
+        }
+
+        [Test]
+        public void Can_Remove_Entries_From_Trie()
+        {
+            Assert.False(trie.Contains("test"));
+            trie.Add("test");
+            Assert.True(trie.Contains("test"));
+            trie.Remove("test");
+            Assert.False(trie.Contains("test"));
+        }
+
+        [Test]
+        public void Ignores_Apostrophes()
+        {
+            trie.Add("Bob's");
+            Assert.True(trie.Contains("Bob's"));
+            Assert.True(trie.Contains("Bobs"));
+            trie.Remove("bob's");
+            Assert.False (trie.Contains("Bob's"));
+            Assert.False(trie.Contains("Bobs"));
+        }
+
+        [Test]
+        [ExpectedException(typeof(ArgumentNullException))]
+        public void Adding_Null_String_Throws_ArgumentNullException()
+        {
+            trie.Add(null);
+        }
+
+        [Test]
         public void Integration_Tests()
         {
             trie.Add("dog");
